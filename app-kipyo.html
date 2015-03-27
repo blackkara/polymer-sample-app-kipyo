@@ -1,0 +1,77 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="imports.html">
+
+<polymer-element name="app-kipyo" constructor="AppKipyo" attributes="demo sentence">
+
+  <template>
+
+      <app-business service="{{service}}" url="{{url}}" period="{{period}}"></app-business>
+
+      <app-ui service="{{service}}" demo="{{demo}}"></app-ui>
+
+  </template>
+
+  <script>
+
+      Polymer({
+
+          tag: 'app-kipyo: ',
+
+          log: false,
+
+          demo: false,
+
+          ready: function(){
+
+              var self = this;
+              var ui = self.shadowRoot.querySelector('app-ui');
+              var business = self.shadowRoot.querySelector('app-business');
+
+              business.addEventListener('on-position-changed', function(position){
+                  if(self.log) console.log(self.tag + 'position changed');
+                  ui.setPosition(position.detail);
+              });
+
+              business.addEventListener('on-sentence-changed', function(sentence){
+                  if(self.log) console.log(self.tag + 'sentence changed');
+                  //if there's need to use phone ui
+                  //ui.setSentence(sentence);
+                  //self.fire('on-sentence-changed');
+                  self.sentence = sentence;
+              });
+
+
+              if(self.demo){
+
+                  function callbackDemoStarted (e){
+                      if(self.log) console.log(self.tag + 'demo started');
+                      ui.setDemoUi(true);
+                  };
+
+                  function callbackDemoFinished (e){
+                      if(self.log) console.log(self.tag + 'demo finished');
+                      ui.setDemoUi(false);
+                  };
+
+                  function callbackDemoChanged (e){
+                      if(self.log) console.log(self.tag + 'demo changed');
+                      if(!e.detail) business.demoPause();
+                      else business.demoStart();
+                  };
+
+                  function callbackDemoSpeed (e){
+                      if(self.log) console.log(self.tag + 'demo speed changed');
+                      business.demoChangeSpeed(e.detail);
+                  };
+
+                  ui.addEventListener('on-demo-changed', callbackDemoChanged, false);
+                  ui.addEventListener('on-demo-speed-changed', callbackDemoSpeed, false);
+                  business.addEventListener('on-demo-started', callbackDemoStarted, false);
+                  business.addEventListener('on-demo-finished', callbackDemoFinished, false);
+                  business.demoStart();
+              }
+
+          }
+      });
+  </script>
+</polymer-element>
